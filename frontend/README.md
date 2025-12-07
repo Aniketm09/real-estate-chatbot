@@ -174,9 +174,8 @@ Example:
 
 # 🎥 Demo Video
 
-(Required by assignment)
-
-👉 Upload a 1–2 minute screen recording on \*\*Drive /
+demo video of real-estate-chatbot
+videolink-https://drive.google.com/drive/u/1/home
 
 ---
 
