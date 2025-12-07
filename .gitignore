@@ -1,0 +1,22 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/**/*.pyc
+
+# Node / React
+frontend/**/node_modules/
+frontend/**/build/
+frontend/**/.env
+
+# Env + secrets
+*.env
+.env
+
+# IDE / OS junk
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Others
+__pycache__/
