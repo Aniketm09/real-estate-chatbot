@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
-DATA_PATH = Path(__file__).resolve().parent.parent / "Sample_data.xlsx"
+DATA_PATH = Path(__file__).resolve().parent.parent / "Sample_data.csv"
 
 _df_cache = None
 
