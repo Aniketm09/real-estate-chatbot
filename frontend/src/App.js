@@ -123,7 +123,7 @@ function App() {
             {/* Download CSV button */}
             {result.locations?.length > 0 && (
               <a
-                href={`http://127.0.0.1:8000/api/download/?area=${result.locations[0]}`}
+                href={`https://real-estate-chatbot-5gi5.onrender.com/api/download/?area=${result.locations[0]}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-outline-success download-btn"
