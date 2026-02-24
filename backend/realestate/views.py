@@ -23,14 +23,17 @@ from .analysis import (
 @api_view(["POST"])
 def analyze_query(request):
     try:
-        message = request.data.get("message", "")
-        if not message.strip():
-            return Response({"error": "Message text is required"}, status=400)
+        # Accept both frontend formats: message or query
+        message = request.data.get("message") or request.data.get("query") or ""
 
-        # Load dataset once per request
+        if not message.strip():
+            return Response(
+                {"error": "Message text is required"},
+                status=400
+            )
+
         df = get_dataset()
 
-        # Extract location names from user query
         locations = extract_locations(message, df)
         query_type = detect_query_type(message)
 
@@ -40,7 +43,6 @@ def analyze_query(request):
                 "locations_available": df["final_location"].unique().tolist()
             }, status=404)
 
-        # Generate summary based on query type
         if query_type == "single_area":
             area = locations[0]
             summary = summary_single(area, df)
@@ -78,8 +80,11 @@ def analyze_query(request):
         })
 
     except Exception as e:
-        return Response({"error": f"Internal Server Error: {e}"}, status=500)
-
+        print("ERROR:", str(e))
+        return Response(
+            {"error": f"Internal Server Error: {str(e)}"},
+            status=500
+        )
 
 # ------------------------------
 # DOWNLOAD DATA ENDPOINT (Bonus)
