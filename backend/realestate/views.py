@@ -13,6 +13,7 @@ from .analysis import (
     summary_demand_trend,
     chart_data_for_area,
     table_data_for_area,
+    LOCATION_COL
 )
 
 
@@ -23,7 +24,6 @@ from .analysis import (
 @api_view(["POST"])
 def analyze_query(request):
     try:
-        # Accept both frontend formats: message or query
         message = request.data.get("message") or request.data.get("query") or ""
 
         if not message.strip():
@@ -40,7 +40,7 @@ def analyze_query(request):
         if not locations and query_type != "compare":
             return Response({
                 "error": "No matching location found in dataset.",
-                "locations_available": df["final_location"].unique().tolist()
+                "locations_available": df[LOCATION_COL].unique().tolist()
             }, status=404)
 
         if query_type == "single_area":
@@ -86,33 +86,47 @@ def analyze_query(request):
             status=500
         )
 
+
 # ------------------------------
-# DOWNLOAD DATA ENDPOINT (Bonus)
+# DOWNLOAD DATA ENDPOINT
 # ------------------------------
 
 @api_view(["GET"])
 def download_data(request):
-    """
-    Download filtered data for a specific area as CSV.
-    Example: /api/download/?area=Wakad
-    """
+
     try:
         area = request.GET.get("area")
+
         if not area:
-            return Response({"error": "area query parameter is required"}, status=400)
+            return Response(
+                {"error": "area query parameter is required"},
+                status=400
+            )
 
         df = get_dataset()
-        filtered = df[df["final_location"].str.lower() == area.lower()]
+
+        filtered = df[
+            df[LOCATION_COL].str.lower() == area.lower()
+        ]
 
         if filtered.empty:
-            return Response({"error": f"No data found for {area}"}, status=404)
+            return Response(
+                {"error": f"No data found for {area}"},
+                status=404
+            )
 
-        # Convert to CSV
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f'attachment; filename="{area}_data.csv"'
+
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename="{area}_data.csv"'
+
         filtered.to_csv(response, index=False)
 
         return response
 
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        return Response(
+            {"error": str(e)},
+            status=500
+        )

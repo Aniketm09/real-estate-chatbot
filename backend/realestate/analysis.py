@@ -5,19 +5,31 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
-# Load environment variables (safe for Render + local)
+# Load environment variables
 load_dotenv()
 
+
 # ==============================
-# COLUMN CONSTANTS (FIXED)
+# COLUMN CONSTANTS
 # ==============================
 
-LOCATION_COL = "final location"   
+LOCATION_COL = "final location"
 YEAR_COL = "year"
 
 
 # ==============================
-# OpenAI Client (SAFE)
+# SAFE ROUND HELPER
+# ==============================
+
+def safe_round(value):
+    try:
+        return round(float(value))
+    except:
+        return value
+
+
+# ==============================
+# OpenAI Client
 # ==============================
 
 def get_openai_client():
@@ -82,9 +94,7 @@ def extract_locations(message: str, df: pd.DataFrame) -> List[str]:
     found = []
 
     for loc in locations:
-
         loc_str = str(loc)
-
         if loc_str.lower() in text:
             found.append(loc_str)
 
@@ -92,7 +102,7 @@ def extract_locations(message: str, df: pd.DataFrame) -> List[str]:
 
 
 # ==============================
-# LLM summary (SAFE)
+# LLM summary
 # ==============================
 
 def llm_summary(system_prompt: str, user_prompt: str) -> str | None:
@@ -102,28 +112,23 @@ def llm_summary(system_prompt: str, user_prompt: str) -> str | None:
         client = get_openai_client()
 
         response = client.chat.completions.create(
-
             model="gpt-4o-mini",
-
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-
             max_tokens=200
         )
 
         return response.choices[0].message.content
 
     except Exception as e:
-
         print("LLM fallback:", str(e))
-
         return None
 
 
 # ==============================
-# SUMMARY FUNCTIONS
+# SINGLE AREA SUMMARY
 # ==============================
 
 def summary_single(area: str, df: pd.DataFrame) -> str:
@@ -158,8 +163,8 @@ def summary_single(area: str, df: pd.DataFrame) -> str:
 
     if flat_col and flat_col in area_df.columns:
 
-        start = round(area_df[flat_col].iloc[0])
-        end = round(area_df[flat_col].iloc[-1])
+        start = safe_round(area_df[flat_col].iloc[0])
+        end = safe_round(area_df[flat_col].iloc[-1])
 
         trend = (
             "increased"
@@ -173,8 +178,8 @@ def summary_single(area: str, df: pd.DataFrame) -> str:
 
     if demand_col and demand_col in area_df.columns:
 
-        start = round(area_df[demand_col].iloc[0])
-        end = round(area_df[demand_col].iloc[-1])
+        start = safe_round(area_df[demand_col].iloc[0])
+        end = safe_round(area_df[demand_col].iloc[-1])
 
         parts.append(f"Demand changed from {start} to {end}")
 
@@ -219,7 +224,7 @@ def summary_compare(areas: List[str], df: pd.DataFrame) -> str:
         if not row.empty and flat_col in row.columns:
 
             parts.append(
-                f"{area}: {round(row[flat_col].iloc[0])}"
+                f"{area}: {safe_round(row[flat_col].iloc[0])}"
             )
 
     return " | ".join(parts)
@@ -248,7 +253,10 @@ def summary_price_growth(area: str, df: pd.DataFrame) -> str:
 
     years = area_df[YEAR_COL].tolist()
 
-    prices = area_df[flat_col].tolist()
+    prices = [
+        safe_round(p)
+        for p in area_df[flat_col].tolist()
+    ]
 
     return ", ".join(
         [f"{y}: {p}" for y, p in zip(years, prices)]
@@ -276,8 +284,8 @@ def summary_demand_trend(area: str, df: pd.DataFrame) -> str:
     if llm:
         return llm
 
-    start = round(area_df[demand_col].iloc[0])
-    end = round(area_df[demand_col].iloc[-1])
+    start = safe_round(area_df[demand_col].iloc[0])
+    end = safe_round(area_df[demand_col].iloc[-1])
 
     trend = (
         "increased"
