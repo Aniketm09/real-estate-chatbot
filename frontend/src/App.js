@@ -15,7 +15,7 @@ import "./index.css";
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Legend, Tooltip);
 
 // API URL (LOCAL DJANGO SERVER)
-const API_URL = "https://real-estate-chatbot-5gi5.onrender.com";
+const API_URL = "https://real-estate-chatbot-5gi5.onrender.com/api/analyze/";
 
 function App() {
   const [messages, setMessages] = useState([
